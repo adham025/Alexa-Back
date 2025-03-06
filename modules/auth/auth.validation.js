@@ -6,7 +6,13 @@ export const signUpValidation = {
     .keys({
       userName: Joi.string().min(3).max(30).required(),
       email: Joi.string().email(),
-      password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{8,30}$")),
+      password: Joi.string()
+        .regex(/^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+=/{}|?]).{8,}$/)
+        .messages({
+          "string.pattern.base":
+            "Password must contain at least one letter, one number, and one special character (!@#$%^&*).",
+        })
+        .required(),
       cPassword: Joi.string().valid(Joi.ref("password")).required(),
     }),
 };
