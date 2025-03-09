@@ -46,7 +46,9 @@ export const createCart = asyncHandler(async (req, res, next) => {
     options: { new: true },
   });
 
-  res.status(200).json({ message: "Cart updated successfully", updatedCart });
+  res
+    .status(200)
+    .json({ message: "Cart updated successfully", cart: updatedCart });
 });
 
 export const removeFromCart = asyncHandler(async (req, res, next) => {
@@ -106,28 +108,37 @@ export const updateCartQuantity = asyncHandler(async (req, res) => {
   try {
     const { bikeId } = req.params;
     const { quantity } = req.body;
-    let { _id } = req.user; 
+    let { _id } = req.user;
 
     const bikeObjectId = new mongoose.Types.ObjectId(bikeId);
 
     const bike = await bikeModel.findById(bikeObjectId);
     if (!bike) {
-      return res.status(404).json({ success: false, message: "Bike not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Bike not found" });
     }
     if (quantity > bike.stock) {
-      return res.status(400).json({ success: false, message: "Quantity exceeds stock availability" });
+      return res.status(400).json({
+        success: false,
+        message: "Quantity exceeds stock availability",
+      });
     }
-    const cart = await cartModel.findOneAndUpdate(
-      {
-        userId: _id,
-        "bikes.bikeId": bikeObjectId,
-      },
-      { $set: { "bikes.$.quantity": quantity } },
-      { new: true }
-    ).populate("bikes.bikeId");
+    const cart = await cartModel
+      .findOneAndUpdate(
+        {
+          userId: _id,
+          "bikes.bikeId": bikeObjectId,
+        },
+        { $set: { "bikes.$.quantity": quantity } },
+        { new: true }
+      )
+      .populate("bikes.bikeId");
 
     if (!cart) {
-      return res.status(404).json({ success: false, message: "Cart not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Cart not found" });
     }
 
     res.json({ success: true, cart });
@@ -136,4 +147,3 @@ export const updateCartQuantity = asyncHandler(async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
-
