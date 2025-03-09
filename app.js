@@ -19,13 +19,17 @@ app.use(morgan("tiny"));
 app.use(cors());
 
 connection();
+
+app.get("/", (req, res) => {
+  res.status(200).json({ status: "Backend is working" });
+});
+
 //Setup API Routing
 app.use(`${baseUrl}/auth`, indexRouter.authRouter);
 app.use(`${baseUrl}/cart`, indexRouter.cartRouter);
 app.use(`${baseUrl}/category`, indexRouter.categoryRouter);
 app.use(`${baseUrl}/brand`, indexRouter.brandRouter);
 app.use(`${baseUrl}/bike`, indexRouter.bikeRouter);
-// app.use(`${baseUrl}/product`, indexRouter.productRouter);
 
 app.use("*", (req, res, next) => {
   res.send("In-valid Routing Plz check url or method");
