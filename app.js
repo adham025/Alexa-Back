@@ -8,12 +8,12 @@ import express from "express";
 import morgan from "morgan";
 import * as indexRouter from "./modules/index.route.js";
 import connection from "./DB/connection.js";
-import { globalError } from "./services/asyncHandler.js";
+// import { globalError } from "./services/asyncHandler.js";
 
 const app = express();
 // setup port and the baseUrl
-const port = process.env.PORT || 5000;
-const baseUrl = process.env.BASEURL;
+const port = 3000 || 5000;
+const baseUrl = "/api/v1";
 app.use(express.json());
 app.use(morgan("tiny"));
 app.use(cors());
@@ -35,6 +35,6 @@ app.use("*", (req, res, next) => {
   res.send("In-valid Routing Plz check url or method");
 });
 
-app.use(globalError);
+// app.use(globalError);
 
 app.listen(port, () => console.log(`App listening on port ${port}!`));

@@ -20,7 +20,7 @@ export const auth = (acceptRoles = [roles.User, roles.Admin]) => {
     const token = authorization.split("Bearer__")[1]?.trim();
 
     try {
-      const decoded = jwt.verify(token, process.env.tokenSignature);
+      const decoded = jwt.verify(token, "c38juihjuujRoute");
       if (!decoded?.id || !decoded?.isLoggedIn) {
         return next(new Error("Invalid token payload", { cause: 400 }));
       }

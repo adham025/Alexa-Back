@@ -24,10 +24,7 @@ export const signUp = async (req, res, next) => {
       if (user) {
         next(new Error("This email already registered", { cause: 409 }));
       } else {
-        let hashedPassword = bcrypt.hashSync(
-          password,
-          parseInt(process.env.SALTROUND)
-        );
+        let hashedPassword = bcrypt.hashSync(password, parseInt("9"));
         let addUser = new userModel({
           userName,
           email,
@@ -35,10 +32,10 @@ export const signUp = async (req, res, next) => {
         });
         let token = jwt.sign(
           { id: addUser._id, isLoggedIn: true },
-          process.env.emailToken,
+          "c38fridayupvote1231",
           { expiresIn: 60 * 60 }
         );
-        let link = `${req.protocol}://${req.headers.host}${process.env.BASEURL}/auth/confirmEmail/${token}`;
+        let link = `${req.protocol}://${req.headers.host}/api/v1/auth/confirmEmail/${token}`;
 
         let emailTemplatePath = path.join(
           __dirname,
@@ -69,7 +66,7 @@ export const signUp = async (req, res, next) => {
 export const confirmEmail = async (req, res, next) => {
   try {
     let { token } = req.params;
-    let decoded = jwt.verify(token, process.env.emailToken);
+    let decoded = jwt.verify(token, "c38fridayupvote1231");
     if (!decoded && !decoded.id) {
       return res.sendFile(
         path.join(__dirname, "./emailTemplates/email-failed.html")
@@ -104,18 +101,14 @@ export const logIn = asyncHandler(async (req, res, next) => {
   if (!user) {
     next(new Error("You have to register first", { cause: 404 }));
   } else {
-    let matched = bcrypt.compareSync(
-      password,
-      user.password,
-      parseInt(process.env.SALTROUND)
-    );
+    let matched = bcrypt.compareSync(password, user.password, parseInt("9"));
     if (matched) {
       if (!user.confirmEmail) {
         next(new Error("You have to confirm your email first", { cause: 400 }));
       } else {
         let token = jwt.sign(
           { id: user._id, isLoggedIn: true },
-          process.env.tokenSignature,
+          "c38juihjuujRoute",
           { expiresIn: 60 * 60 * 60 * 24 * 2 }
         );
         res.status(200).json({ message: "Success", user, token });
