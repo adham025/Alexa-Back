@@ -175,3 +175,31 @@ export const getBikeById = asyncHandler(async (req, res, next) => {
     res.status(200).json({ message: " Done", bike });
   }
 });
+export const getBikesByCategory = asyncHandler(async (req, res, next) => {
+  const { categoryId } = req.params;
+
+  const bikes = await bikeModel.find({ categoryId });
+  if (bikes.length === 0) {
+    return res.status(404).json({ message: "No bikes found in this category" });
+  }
+  res.status(200).json({ message: "Bikes fetched successfully", bikes });
+});
+export const getBikesByBrand = asyncHandler(async (req, res, next) => {
+  const { brandId } = req.params;
+
+  const bikes = await bikeModel.find({ brandId });
+  if (bikes.length === 0) {
+    return res.status(404).json({ message: "No bikes found in this category" });
+  }
+  res.status(200).json({ message: "Bikes fetched successfully", bikes });
+});
+
+export const deleteBike = asyncHandler(async (req, res, next) => {
+  const { bikeId } = req.params;
+  const bike = await bikeModel.findById(bikeId);
+  if (!bike) {
+    return next(new Error("Invalid bike", { cause: 404 }));
+  }
+  await bikeModel.findByIdAndDelete(bikeId);
+  res.status(200).json({ message: "Bike deleted successfully", bike });
+});

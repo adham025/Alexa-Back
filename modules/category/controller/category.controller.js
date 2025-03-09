@@ -63,3 +63,13 @@ export const getCategoryById = asyncHandler(async (req, res, next) => {
     res.status(200).json({ message: " Done", allCategories })
 
 })
+
+export const deleteCategory = asyncHandler(async (req, res, next) => {
+  const { categoryId } = req.params;
+  const category = await categoryModel.findById(categoryId);
+  if (!category) {
+    return next(new Error("Invalid category", { cause: 404 }));
+  }
+  await categoryModel.findByIdAndDelete(categoryId);
+  res.status(200).json({ message: "Category deleted successfully", category });
+});

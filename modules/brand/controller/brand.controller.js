@@ -1,6 +1,6 @@
 import { asyncHandler } from "../../../services/asyncHandler.js";
 import slugify from "slugify";
-import { create, findByIdAndUpdate } from "../../../DB/DBMethods.js";
+import { create, findByIdAndUpdate, find } from "../../../DB/DBMethods.js";
 import cloudinary from "../../../services/cloudinary.js";
 import brandModel from "../../../DB/model/brand.model.js";
 
@@ -51,4 +51,19 @@ export const updateBrand = asyncHandler(async (req, res, next) => {
     await cloudinary.uploader.destroy(results.public_id);
     res.status(200).json({ message: "updated", results });
   }
+});
+
+export const brands = asyncHandler(async (req, res, next) => {
+  let allBrands = await find({ model: brandModel });
+  res.status(200).json({ message: " Done", allBrands });
+});
+
+export const deleteBrand = asyncHandler(async (req, res, next) => {
+  const { brandId } = req.params;
+  const brand = await brandModel.findById(brandId);
+  if (!brand) {
+    return next(new Error("Invalid brand", { cause: 404 }));
+  }
+  await brandModel.findByIdAndDelete(brandId);
+  res.status(200).json({ message: "Brand deleted successfully", brand });
 });
