@@ -16,12 +16,18 @@ export const find = async ({
   skip = 0,
   populate = [],
 } = {}) => {
-  let data = await model
-    .find(condition)
-    .skip(skip)
-    .limit(limit)
-    .select(select)
-    .populate(populate);
+  let query = model.find(condition);
+
+  if (skip) query = query.skip(skip);
+  if (limit) query = query.limit(limit);
+  if (select) query = query.select(select);
+  if (populate.length > 0) {
+    populate.forEach((pop) => {
+      query = query.populate(pop);
+    });
+  }
+
+  let data = await query.exec();
   return data;
 };
 

@@ -178,18 +178,30 @@ export const getBikeById = asyncHandler(async (req, res, next) => {
 export const getBikesByCategory = asyncHandler(async (req, res, next) => {
   const { categoryId } = req.params;
 
-  const bikes = await bikeModel.find({ categoryId });
+  const bikes = await find({
+    model: bikeModel,
+    condition: { categoryId },
+    populate: [...populate],
+  });
+
+  console.log("Bikes with populate:", bikes);
+
   if (bikes.length === 0) {
     return res.status(404).json({ message: "No bikes found in this category" });
   }
   res.status(200).json({ message: "Bikes fetched successfully", bikes });
 });
+
 export const getBikesByBrand = asyncHandler(async (req, res, next) => {
   const { brandId } = req.params;
 
-  const bikes = await bikeModel.find({ brandId });
+  const bikes = await find({
+    model: bikeModel,
+    condition: { brandId },
+    populate: [...populate],
+  });
   if (bikes.length === 0) {
-    return res.status(404).json({ message: "No bikes found in this category" });
+    return res.status(404).json({ message: "No bikes found for this brand" });
   }
   res.status(200).json({ message: "Bikes fetched successfully", bikes });
 });
