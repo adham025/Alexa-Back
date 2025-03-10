@@ -6,8 +6,6 @@ export const roles = {
   Admin: "Admin",
 };
 
-const secretKey = "turtle";
-
 export const auth = (acceptRoles = [roles.User, roles.Admin]) => {
   return asyncHandler(async (req, res, next) => {
     console.log("Received Headers:", req.headers);
@@ -22,7 +20,7 @@ export const auth = (acceptRoles = [roles.User, roles.Admin]) => {
     const token = authorization.split("Bearer__")[1]?.trim();
 
     try {
-      const decoded = jwt.verify(token, secretKey); 
+      const decoded = jwt.verify(token, process.env.tokenSignature);
       if (!decoded?.id || !decoded?.isLoggedIn) {
         return next(new Error("Invalid token payload", { cause: 400 }));
       }

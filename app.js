@@ -12,8 +12,8 @@ import connection from "./DB/connection.js";
 
 const app = express();
 // setup port and the baseUrl
-const port = 3000 || 5000;
-const baseUrl = "/api/v1";
+const port = process.env.PORT || 5000;
+const baseUrl = process.env.BASEURL;
 app.use(express.json());
 app.use(morgan("tiny"));
 app.use(cors());

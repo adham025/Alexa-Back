@@ -10,12 +10,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const secretKey = "turtle"
-
 export const signUp = async (req, res, next) => {
   try {
     const { userName, email, password, cPassword } = req.body;
-    
+
     if (password !== cPassword) {
       next(new Error("Passwords don't match", { cause: 409 }));
     } else {
@@ -24,24 +22,27 @@ export const signUp = async (req, res, next) => {
         condition: { email },
         select: "email",
       });
-      
+
       if (user) {
         next(new Error("This email already registered", { cause: 409 }));
       } else {
-        let hashedPassword = bcrypt.hashSync(password, parseInt("9"));
+        let hashedPassword = bcrypt.hashSync(
+          password,
+          parseInt(process.env.SALTROUND)
+        );
         let addUser = new userModel({
           userName,
           email,
           password: hashedPassword,
         });
-        
+
         // Create a JWT token for email confirmation
         let token = jwt.sign(
           { id: addUser._id, isLoggedIn: true },
-          secretKey, // Use the hardcoded secret key
+          process.env.emailToken,
           { expiresIn: 60 * 60 }
         );
-        
+
         // Create a link for email confirmation
         let link = `${req.protocol}://${req.headers.host}/api/v1/auth/confirmEmail/${token}`;
 
@@ -74,10 +75,9 @@ export const signUp = async (req, res, next) => {
 export const confirmEmail = async (req, res, next) => {
   try {
     let { token } = req.params;
-    
-    // Verify the token using the hardcoded secret key
-    let decoded = jwt.verify(token, secretKey);
-    
+
+    let decoded = jwt.verify(token, process.env.emailToken);
+
     if (!decoded || !decoded.id) {
       return res.sendFile(
         path.join(__dirname, "./emailTemplates/email-failed.html")
@@ -89,7 +89,7 @@ export const confirmEmail = async (req, res, next) => {
         data: { confirmEmail: true },
         options: { new: true },
       });
-      
+
       if (updatedUser) {
         return res.sendFile(
           path.join(__dirname, "./emailTemplates/email-success.html")
@@ -109,24 +109,27 @@ export const confirmEmail = async (req, res, next) => {
 
 export const logIn = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
-  
+
   const user = await findOne({ model: userModel, condition: { email } });
-  
+
   if (!user) {
     next(new Error("You have to register first", { cause: 404 }));
   } else {
-    let matched = bcrypt.compareSync(password, user.password, parseInt("9"));
-    
+    let matched = bcrypt.compareSync(
+      password,
+      user.password,
+      parseInt(process.env.SALTROUND)
+    );
     if (matched) {
       if (!user.confirmEmail) {
         next(new Error("You have to confirm your email first", { cause: 400 }));
       } else {
         let token = jwt.sign(
           { id: user._id, isLoggedIn: true },
-          secretKey,  // Use the hardcoded secret key
+          process.env.tokenSignature,
           { expiresIn: 60 * 60 * 60 * 24 * 2 }
         );
-        
+
         res.status(200).json({ message: "Success", user, token });
       }
     } else {
@@ -134,7 +137,6 @@ export const logIn = asyncHandler(async (req, res, next) => {
     }
   }
 });
-
 
 export const updateRole = asyncHandler(async (req, res, next) => {
   let { userId } = req.body;
